@@ -10,7 +10,7 @@ col1, col2 = st.columns(2)
 home_value = col1.number_input("Home Value", min_value=0, value=500000)
 deposit = col1.number_input("Deposit", min_value=0, value=100000)
 interest_rate = col2.number_input("Interest Rate (in %)", min_value=0.0, value=5.5)
-loan_term = col2.number_input("Loan Term (in years)", min_value=1, value=30)
+loan_term = col2.slider("Loan Term (in years)", min_value=1, max_value=50, value=30)
 
 # Calculate the repayments.
 loan_amount = home_value - deposit
@@ -31,7 +31,6 @@ col1, col2, col3 = st.columns(3)
 col1.metric(label="Monthly Repayments", value=f"${monthly_payment:,.2f}")
 col2.metric(label="Total Repayments", value=f"${total_payments:,.0f}")
 col3.metric(label="Total Interest", value=f"${total_interest:,.0f}")
-
 
 # Create a data-frame with the payment schedule.
 schedule = []
@@ -58,7 +57,16 @@ df = pd.DataFrame(
     columns=["Month", "Payment", "Principal", "Interest", "Remaining Balance", "Year"],
 )
 
+# Display the amortization schedule table.
+st.write("### Amortization Schedule")
+st.dataframe(df)
+
 # Display the data-frame as a chart.
-st.write("### Payment Schedule")
-payments_df = df[["Year", "Remaining Balance"]].groupby("Year").min()
-st.line_chart(payments_df)
+st.write("### Payment Schedule Chart")
+chart_type = st.selectbox("Select Chart Type", ["Line Chart", "Bar Chart"])
+if chart_type == "Line Chart":
+    payments_df = df[["Year", "Remaining Balance"]].groupby("Year").min()
+    st.line_chart(payments_df)
+elif chart_type == "Bar Chart":
+    st.bar_chart(df.set_index("Month")[["Principal", "Interest"]])
+
